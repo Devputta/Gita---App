@@ -1,0 +1,8 @@
+import { useCallback, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Screen } from "@/components/layout/Screen"; import { AppHeader } from "@/components/layout/AppHeader"; import { EmptyState } from "@/components/common/EmptyState";
+import { bookmarkStore, type BookmarkRecord } from "@/lib/bookmarks/store"; import { LANGUAGE_NAMES } from "@/constants/languages"; import { colors, radii, spacing } from "@/constants/theme";
+export default function BookmarksScreen() { const router = useRouter(); const [items,setItems]=useState<BookmarkRecord[]>([]); const load=useCallback(()=>void bookmarkStore.list().then(setItems),[]); useFocusEffect(useCallback(()=>{load();},[load]));
+return <Screen><AppHeader title="Bookmarks" subtitle="Saved verses on this device. Authentication can be connected later." />{!items.length?<EmptyState title="No bookmarks yet" message="Open a verse and choose Bookmark." />:<View style={styles.list}>{items.map(item=><Pressable key={item.id} style={styles.card} onPress={()=>router.push(`/gita/verse/${item.chapterNumber}/${item.verseNumber}`)}><Text style={styles.title}>Chapter {item.chapterNumber} · Verse {item.verseNumber}</Text><Text style={styles.meta}>{LANGUAGE_NAMES[item.language]} · {new Date(item.createdAt).toLocaleDateString()}</Text></Pressable>)}</View>}</Screen>; }
+const styles=StyleSheet.create({list:{gap:spacing.sm},card:{padding:spacing.md,backgroundColor:colors.paper,borderWidth:1,borderColor:colors.border,borderRadius:radii.md},title:{fontSize:16,fontWeight:"800",color:colors.ink},meta:{marginTop:4,color:colors.muted,fontSize:13}});

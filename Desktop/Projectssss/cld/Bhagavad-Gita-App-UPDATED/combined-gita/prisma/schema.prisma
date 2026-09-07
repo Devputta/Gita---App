@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LanguageCode {
+  SANSKRIT
+  KANNADA
+  HINDI
+  ENGLISH
+}
+
+enum ReviewStatus {
+  DRAFT
+  AI_GENERATED
+  REVIEW_REQUIRED
+  HUMAN_REVIEWED
+  PUBLISHED
+}
+
+enum SourceKind {
+  ORIGINAL_SANSKRIT
+  TRANSLATION
+  COMMENTARY
+  AI_EXPLANATION
+  AUDIO
+}
+
+model Language {
+  code          LanguageCode @id
+  displayName   String
+  nativeName    String
+  translations  Translation[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Book {
+  id            String @id @default(cuid())
+  title         String
+  titleSanskrit String
+  attribution   String
+  description   String
+  chapters      Chapter[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Chapter {
+  id             String @id @default(cuid())
+  bookId         String
+  chapterNumber  Int
+  titleSanskrit  String?
+  titleKannada   String?
+  titleHindi     String?
+  titleEnglish   String?
+  description    String?
+  verseCount     Int?
+  book           Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  verses         Verse[]
+  readingProgress ReadingProgress[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([bookId, chapterNumber])
+  @@index([chapterNumber])
+}
+
+model Verse {
+  id             String @id @default(cuid())
+  chapterId      String
+  verseNumber    Int
+  sanskrit       String
+  transliteration String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  chapter        Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  translations   Translation[]
+  commentaries   Commentary[]
+  audio          Audio[]
+  bookmarks      Bookmark[]
+  readingProgress ReadingProgress[]
+
+  @@unique([chapterId, verseNumber])
+  @@index([chapterId])
+  @@index([verseNumber])
+}
+
+model Source {
+  id          String @id @default(cuid())
+  kind        SourceKind
+  title       String
+  creator     String?
+  publisher   String?
+  license     String?
+  sourceUrl   String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Translation {
+  id            String @id @default(cuid())
+  verseId       String
+  language      LanguageCode
+  text          String
+  source        String?
+  translator    String?
+  publisher     String?
+  license       String?
+  sourceUrl     String?
+  notes         String?
+  reviewStatus  ReviewStatus @default(DRAFT)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  verse         Verse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  languageRef   Language @relation(fields: [language], references: [code])
+
+  @@unique([verseId, language])
+  @@index([language])
+  @@index([verseId])
+}
+
+model Commentary {
+  id            String @id @default(cuid())
+  verseId       String
+  language      LanguageCode
+  text          String
+  source        String?
+  author        String?
+  license       String?
+  sourceUrl     String?
+  reviewStatus  ReviewStatus @default(DRAFT)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  verse         Verse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@index([verseId])
+  @@index([language])
+}
+
+model Audio {
+  id            String @id @default(cuid())
+  verseId       String
+  language      LanguageCode
+  uri           String
+  durationMs    Int?
+  source        String?
+  license       String?
+  provider      String?
+  voice         String?
+  speed         Float?
+  approvedBy    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  verse         Verse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@index([verseId])
+  @@index([language])
+}
+
+model User {
+  id               String @id @default(cuid())
+  externalAuthId   String? @unique
+  email            String? @unique
+  displayName      String?
+  language         LanguageCode @default(SANSKRIT)
+  themePreference  String @default("system")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  bookmarks        Bookmark[]
+  readingProgress  ReadingProgress[]
+}
+
+model Bookmark {
+  id         String @id @default(cuid())
+  userId     String
+  verseId    String
+  createdAt  DateTime @default(now())
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verse      Verse @relation(fields: [verseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, verseId])
+  @@index([verseId])
+}
+
+model ReadingProgress {
+  id          String @id @default(cuid())
+  userId      String
+  verseId     String?
+  chapterId   String?
+  progress    Float @default(0)
+  updatedAt   DateTime @updatedAt
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verse       Verse? @relation(fields: [verseId], references: [id], onDelete: SetNull)
+  chapter     Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, chapterId])
+  @@index([verseId])
+}

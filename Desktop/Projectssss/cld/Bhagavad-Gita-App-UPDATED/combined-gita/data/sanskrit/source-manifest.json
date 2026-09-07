@@ -1,0 +1,27 @@
+{
+  "source": "gita/gita — data/verse.json",
+  "sourceUrl": "https://raw.githubusercontent.com/gita/gita/main/data/verse.json",
+  "license": "Unlicense",
+  "standardVerseCount": 700,
+  "sourceEditionNote": "The source dataset contains an optional Chapter 13 verse 13.1 in addition to the standard 700-verse numbering. The importer excludes that optional verse and shifts source 13.2–13.35 to standard 13.1–13.34.",
+  "expectedVerseCounts": [
+    47,
+    72,
+    43,
+    42,
+    29,
+    47,
+    30,
+    28,
+    34,
+    42,
+    55,
+    20,
+    34,
+    27,
+    20,
+    24,
+    28,
+    78
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "chapterNumber": 2,
+    "verseNumber": 47,
+    "text": "REPLACE ME: this is a placeholder string only, to show the expected shape of an import record. Put your own reviewed, licensed translation text here.",
+    "translator": "Your name or the translator's name",
+    "source": "Name of the publication or edition this came from",
+    "license": "e.g. Public domain, or CC-BY-4.0, or your own license",
+    "sourceUrl": "https://example.com/optional-link",
+    "notes": "Optional: any context for reviewers"
+  }
+]

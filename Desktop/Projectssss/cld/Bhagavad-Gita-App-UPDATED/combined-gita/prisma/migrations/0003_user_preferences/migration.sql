@@ -1,0 +1,2 @@
+ALTER TABLE "User" ADD COLUMN "language" "LanguageCode" NOT NULL DEFAULT 'SANSKRIT';
+ALTER TABLE "User" ADD COLUMN "themePreference" TEXT NOT NULL DEFAULT 'system';
